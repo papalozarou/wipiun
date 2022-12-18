@@ -411,14 +411,12 @@ Because there is no password specified in `docker-compose.xml`, the Pihole conta
 
 ```
 :~ $ sudo docker exec -it pihole /bin/sh
-
 ```
 
 Once inside the container, change the password with:
 
 ```
 :~ $ pihole -a -p
-
 ```
 
 You will be prompted to type a new password. If you leave it empty, no password will be set so you can login without one.
