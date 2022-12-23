@@ -271,13 +271,13 @@ maxretry = 3
 Save and exit the config file. Now reload Fail2Ban:
 
 ```
-:~ $ sudo fail2ban-client reload
+:~ $ sudo systemctl start fail2ban
 ```
 
 Should you wish, you can check the status of Fail2Ban with:
 
 ```
-:~ $ sudo fail2ban-client status
+:~ $ sudo systemctl status fail2ban
 ```
 
 ### References
