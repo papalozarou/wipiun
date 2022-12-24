@@ -36,14 +36,14 @@ Then follow these steps:
 4. Enable billing on this project – as with step 2, you can't continue without it.
 5. Create a new VM instance by tapping the `Create` button.
 6. Fill in or change the following details:
- * Name: `${yourInstanceName}`
- * Region: `us-east1`, `us-west1`, or `us-central1` if you want to remain in the free tier
- * Machine configuration: `General-purpose`, `E2`, `e2-Micro` again for the free tier
- * Boot disk: `Ubuntu`, `Ubuntu 20.04 LTS minimal` or `Ubuntu 22.04 LTS minimal`, `Standard persistent disk`, `30GB`
+   * Name: `${yourInstanceName}`
+   * Region: `us-east1`, `us-west1`, or `us-central1` if you want to remain in the free tier
+   * Machine configuration: `General-purpose`, `E2`, `e2-Micro` again for the free tier
+   * Boot disk: `Ubuntu`, `Ubuntu 20.04 LTS minimal` or `Ubuntu 22.04 LTS minimal`, `Standard persistent disk`, `30GB`
 7. Expand `Advanced Options` then `Networking`, then scroll down and expand `Edit network interface` under `Network interfaces`:
- * Open the `External IPv4 address` dropdown
- * Tap `Create IP address` to create a static IP address
- * Give it a name and tap `Reserve`
+   * Open the `External IPv4 address` dropdown
+   * Tap `Create IP address` to create a static IP address
+   * Give it a name and tap `Reserve`
 9. Scroll to the bottom and tap `Create` to save the instance.
 
 You will now have a Google VM instance that you can SSH into via the Google Cloud console. You will add an SSH key, and change the port for access via a third party client, in step 2. 
