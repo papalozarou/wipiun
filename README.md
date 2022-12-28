@@ -310,7 +310,11 @@ Then copies of both `.env-example` and `docker-compose-example.xml`:
 
 ### 4.1 Customising the `.env` file
 
-You should be able to run the project without making changes to the `.env` file. If you want to more closely match your host system values, run:
+You should be able to run the project without making changes to the `.env` file, however there are two changes that you may want to make.
+
+#### 4.1.1 Changing the user name and group name
+
+If you want to more closely match your host system values, run:
 
 ```
 :~ $ whoami && id
@@ -327,6 +331,15 @@ H_GRP=${yourGroupName}
 ```
 
 If you change `H_USR` and/or `H_GRP` you _will_ need to change the corresponding values in `~/${yourVPNFolder}/unbound/unbound.sh` on lines 23 and 24.
+
+#### 4.1.2 Changing the Unbound version
+
+If you want to change the version of Unbound, edit line 29 to match the version you require:
+
+```
+U_VERSION=1.16.2
+```
+The latest stable version number can be found on the [Unbound homepage](https://nlnetlabs.nl/projects/unbound/about/).
 
 ### 4.2 Customising the `docker-compose.yml` file
 
