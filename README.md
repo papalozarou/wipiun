@@ -232,7 +232,7 @@ Now you will need to add your VPN rule. Towards the top you will see an option t
 5. Scroll to the bottom and tap `Create`.
 
 *N.B.*
-You can also disable and/or delete the `default-allow-rdp` – you will not be running any services on port 3389 so it's safe to disable/remove.
+You can also delete the `default-allow-rdp` and `default-allow-icmp` rules – you will not be running any services on port 3389 (rdp) and you don't really want anyone issuing the [ping of death](https://en.wikipedia.org/wiki/Ping_of_death) (icmp) against you either.
 
 ### 2.4. Configuring Fail2Ban
 
