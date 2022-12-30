@@ -231,9 +231,7 @@ And then change the following lines from `ACCEPT` to `DROP`:
 
 ```
 # ok icmp codes for INPUT
--A ufw-before-input -p icmp --icmp-type destination-unreachable -j DROP
--A ufw-before-input -p icmp --icmp-type time-exceeded -j DROP
--A ufw-before-input -p icmp --icmp-type parameter-problem -j DROP
+[…]
 -A ufw-before-input -p icmp --icmp-type echo-request -j DROP
 ```
 
