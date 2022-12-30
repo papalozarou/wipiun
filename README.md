@@ -221,6 +221,22 @@ And then add [a random port number between 20000 and 65535](https://www.random.o
 :~ $ sudo ufw limit ${vpnPortNumber}/tcp
 ```
 
+UFW doesn't allow you to block ping responses via it's commandline interface, so you need to edit `before.rules`:
+
+```
+:~ $ sudo nano /etc/ufw/before.rules
+```
+
+And then change the following lines from `ACCEPT` to `DROP`:
+
+```
+# ok icmp codes for INPUT
+-A ufw-before-input -p icmp --icmp-type destination-unreachable -j DROP
+-A ufw-before-input -p icmp --icmp-type time-exceeded -j DROP
+-A ufw-before-input -p icmp --icmp-type parameter-problem -j DROP
+-A ufw-before-input -p icmp --icmp-type echo-request -j DROP
+```
+
 Now enable UFW:
 
 ```
