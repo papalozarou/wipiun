@@ -273,6 +273,10 @@ bantime = 10m
 findtime = 5m
 […]
 maxretry = 3
+[…]
+[sshd]
+[…]
+enabled = true
 ```
 
 Save and exit the config file. Now reload Fail2Ban:
