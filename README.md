@@ -155,6 +155,9 @@ Once you have generated your keys, you will need to add the public key to your V
 4. If you wish to create a new user on the VM instance, you will need to add the username, preceeded by a space, to the end of they key within this field, i.e. `ssh-rsa {yourPublicKey} ${yourUsername}`.
 5. Scroll to the bottom and tap `Save`.
 
+*N.B.*
+Do not restart sshd just yet – you will need to allow your SSH port in step 2.3.2 first.
+
 #### 2.3.3. On your local machine
 
 On your local machine add the server to your `ssh_config` or `config` file:
@@ -230,7 +233,13 @@ You can add firewall rules via Google Cloud's web interface. Tap the menu in the
 
 Firstly, you need to edit the existing SSH rule to allow your ${sshPortNumber} from step 2.1. To do this, tap the existing `default-allow-ssh` rule, tap `edit` towards the top then change the value under `TCP` to match your `${sshPortNumber}`. Scroll to the bottom and tap `Save`. This will return you to the current firewall rules list.
 
-Now you will need to add your VPN rule. Towards the top you will see an option to `Create a firewall rule`. Tap this then:
+It's now safe to restart the sshd server for your VM instance:
+
+```
+:~ $ sudo systemctl restart sshd
+```
+
+You will need to add your VPN rule. Towards the top you will see an option to `Create a firewall rule`. Tap this then:
 
 1. Give your rule a name, i.e. `allow-vpn`.
 2. Scroll down to `Targets` and select `All instances in the network`.
