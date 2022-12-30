@@ -90,16 +90,19 @@ PermitRootLogin no
 MaxAuthTries 3
 MaxSessions 3
 […]
+AuthenticationMethods publickey
 PubkeyAuthentication yes
 […]
 PasswordAuthentication no
 PermitEmptyPasswords no
 […]
-ChallengeResponseAuthentication no
+KbdInteractiveAuthentication no
 […]
 KerberosAuthentication no
 […]
 GSSAPIAuthentication no
+[…]
+UsePAM no
 […]
 AllowAgentForwarding no
 […]
@@ -285,6 +288,8 @@ Should you wish, you can check the status of Fail2Ban with:
 
 ### References
 * [Digital Ocean's guide to hardening OpenSSH server](https://www.digitalocean.com/community/tutorials/how-to-harden-openssh-on-ubuntu-20-04)
+* [Cyberciti's OpenSSH best practices](https://www.cyberciti.biz/tips/linux-unix-bsd-openssh-server-best-practices.html)
+* [sshd_config man page](https://man.openbsd.org/sshd_config)
 * [Digital Ocean's guide to setting up UFW](https://www.digitalocean.com/community/tutorials/how-to-set-up-a-firewall-with-ufw-on-ubuntu-20-04)
 * [Digital Ocean's guide to protecting SSH with Fail2Ban](https://www.digitalocean.com/community/tutorials/how-to-protect-ssh-with-fail2ban-on-ubuntu-20-04)
 
