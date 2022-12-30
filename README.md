@@ -191,13 +191,14 @@ UFW may or may not be installed and if it isn't, install it with:
 :~ $ sudo apt install ufw -y
 ```
 
-Whether it was already installed or you installed it, it will be inactive. Before activating it, you must allow ports for your SSH connection and the later VPN connection. Before that, turn off `ipv6` rule generation, by opening the config file:
+Whether it was already installed or you installed it, it will be inactive. Before activating it, you must allow ports for your SSH connection and the later VPN connection.
+
+Firstly you want to explicitly deny all incoming traffic and allow all outgoing traffic:
 
 ```
-:~ $ sudo nano /etc/default/ufw
+:~ $ sudo ufw default deny incoming
+:~ $ sudo ufw default allow outgoing
 ```
-
-And changing `IPV6=yes` to `IPV6=no`. Close and save the file.
 
 For good measure, explicilty deny port 22:
 
@@ -208,13 +209,13 @@ For good measure, explicilty deny port 22:
 Add your `${sshPortNumber}`, from step 2.1, via `tcp` only:
 
 ```
-:~ $ sudo ufw allow ${sshPortNumber}/tcp
+:~ $ sudo ufw limit ${sshPortNumber}/tcp
 ```
 
 And then add [a random port number between 20000 and 65535](https://www.random.org) for your VPN, via `udp` only:
 
 ```
-:~ $ sudo ufw allow ${vpnPortNumber}/tcp
+:~ $ sudo ufw limit ${vpnPortNumber}/tcp
 ```
 
 Now enable UFW:
@@ -291,6 +292,7 @@ Should you wish, you can check the status of Fail2Ban with:
 * [Cyberciti's OpenSSH best practices](https://www.cyberciti.biz/tips/linux-unix-bsd-openssh-server-best-practices.html)
 * [sshd_config man page](https://man.openbsd.org/sshd_config)
 * [Digital Ocean's guide to setting up UFW](https://www.digitalocean.com/community/tutorials/how-to-set-up-a-firewall-with-ufw-on-ubuntu-20-04)
+* [Cyberciti's guide to limiting SSH connections with UFW](https://www.cyberciti.biz/faq/howto-limiting-ssh-connections-with-ufw-on-ubuntu-debian/)
 * [Digital Ocean's guide to protecting SSH with Fail2Ban](https://www.digitalocean.com/community/tutorials/how-to-protect-ssh-with-fail2ban-on-ubuntu-20-04)
 
 ## 3. Installing Docker
