@@ -78,7 +78,7 @@ Open the SSH daemon config file:
 :~ $ sudo nano /etc/ssh/sshd_config
 ```
 
-Edit and set the following lines – some of them may need uncommenting:
+Edit and set the following lines – some of them may need uncommenting, the last one needs commenting out:
 
 ```
 Port ${sshPortNumber}
@@ -88,6 +88,7 @@ LoginGraceTime 20
 PermitRootLogin no
 […]
 MaxAuthTries 3
+MaxSessions 3
 […]
 PubkeyAuthentication yes
 […]
@@ -105,6 +106,8 @@ AllowAgentForwarding no
 X11Forwarding no
 […]
 PermitUserEnvironment no
+[…]
+#AcceptEnv LANG LC_*
 ```
 
 *N.B.*
