@@ -17,7 +17,10 @@ Makefile
 # -------------------------------------
 # Docker
 # -------------------------------------
-docker-compose.yml
+.env
+.env.example
+compose.yml
+compose.example.yml
 Dockerfile
 
 # -------------------------------------
