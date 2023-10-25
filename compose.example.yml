@@ -1,36 +1,36 @@
 # -----------------------------------------------------------------------------
-# All variables are set in the matching `.env` file.
+# All variables are set in the matching ".env" file.
 # -----------------------------------------------------------------------------
 version: "3.7"
 
 services:
 # -----------------------------------------------------------------------------
-# The `wireguard` container runs the VPN service and depends on `pihole` for 
-# adblocking and `unbound` for DNS. It's `dns` values point to the `pihole` 
-# and `unbound` containers.
+# The "wireguard" container runs the VPN service and depends on "pihole" for 
+# adblocking and "unbound" for DNS. It's "dns" values point to the "pihole" 
+# and "unbound" containers.
 # 
 # There are several environment variables:
-# * `PUID` – set to match the host user id.
-# * `PGID` – set to match the host user's group id .
-# * `TZ` – set to desired location, and should match any other containers.
-# * `SERVER_PORT` – port to listen on, must match the later exposed port value.
-# * `SERVER_URL` – the URL of the VPN server.
-# * `PEERS` – the number of clients to generate files for, which can be a 
+# * "PUID" – set to match the host user id.
+# * "PGID" – set to match the host user's group id .
+# * "TZ" – set to desired location, and should match any other containers.
+# * "SERVER_PORT" – port to listen on, must match the later exposed port value.
+# * "SERVER_URL" – the URL of the VPN server.
+# * "PEERS" – the number of clients to generate files for, which can be a 
 #   number or a list of names. Incremenmt, or add names, and rerun the 
 #   container to add more.
-# * `PEER_DNS` – this must point to the `pihole` container.
-# * `INTERNAL_SUBNET` – the subnet the clients will connect to.
-# * `ALLOWED_IPS` – The IPs/Ranges that the peers will be able to reach using 
+# * "PEER_DNS" – this must point to the "pihole" container.
+# * "INTERNAL_SUBNET" – the subnet the clients will connect to.
+# * "ALLOWED_IPS" – The IPs/Ranges that the peers will be able to reach using 
 #   the VPN connection. If not specified the default value is: 
 #   '0.0.0.0/0, ::0/0' which will cause ALL traffic to route through the VPN.
 #   To enable split tunnelling all private addresses have been set.
 #
-# `cap_add` values are necessary for the container to use the host network from
+# "cap_add" values are necessary for the container to use the host network from
 # the private network the services are connected to.
 #
 # An ipv4 address is specified to allow other services to interact with this
 # container. This address must be within the subnet mask defined in 
-# `vpnNetwork`, under the docker `networks`.
+# "vpnNetwork", under the docker "networks".
 # -----------------------------------------------------------------------------
   wireguard:
     image: papalozarou/wireguard-alpine
@@ -74,17 +74,17 @@ services:
     restart: unless-stopped
 
 # -----------------------------------------------------------------------------
-# The `pihole` container blocks adverts, trackers and annoyances. It creates
+# The "pihole" container blocks adverts, trackers and annoyances. It creates
 # two volumes on the host that house it's data:
-# 1. `etc-dnsmasq.d`
-# 2. `etc-pihole`
+# 1. "etc-dnsmasq.d"
+# 2. "etc-pihole"
 #
-# `ServerIP` points to pihole as does the loopback in `dns`. `DNS1` and the  
-# second `dns` entry points to the unbound container.
+# "ServerIP" points to pihole as does the loopback in "dns". "DNS1" and the  
+# second "dns" entry points to the unbound container.
 #
 # An ipv4 address is specified to allow other services to interact with this
 # container. This address must be within the subnet mask defined in 
-# `vpnNetwork`, under the docker `networks`.
+# "vpnNetwork", under the docker "networks".
 # -----------------------------------------------------------------------------
   pihole:
     image: pihole/pihole:latest
@@ -114,15 +114,15 @@ services:
     restart: unless-stopped
 
 # -----------------------------------------------------------------------------
-# The `unbound` container is a fully recursive local DNS server. Data is stored 
-# in the `unbound_conf` volume.
+# The "unbound" container is a fully recursive local DNS server. Data is stored 
+# in the "unbound_conf" volume.
 #
-# All requests are handled by `unbound` using a `root.hints` file. This file is
+# All requests are handled by "unbound" using a "root.hints" file. This file is
 # periodically updated via a cronjob on the host.
 #
 # An ipv4 address is specified to allow other services to interact with this
 # container. This address must be within the subnet mask defined in 
-# `vpnNetwork`, under the docker `networks`.
+# "vpnNetwork", under the docker "networks".
 # -----------------------------------------------------------------------------
   unbound:
     image: papalozarou/unbound-alpine
@@ -148,8 +148,8 @@ services:
 
 # -----------------------------------------------------------------------------
 # Two networks to separete concerns:
-# 1. default – for `nginx` and `certbot`. 
-# 2. vpnNetwork – for `wireguard`, `pihole` and `unbound`
+# 1. default – for "nginx" and "certbot". 
+# 2. vpnNetwork – for "wireguard", "pihole" and "unbound"
 #
 # The subnet mask is written in CIDR notation and addresses used for services
 # must be part of this range.
