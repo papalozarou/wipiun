@@ -21,12 +21,6 @@ x-build-args:
   C_GRP: ${C_GRP}
   C_USR_DIR: ${C_USR_DIR}
 # ------------------------------------------------------------------------------
-# Docker extension fields for default user, used with third party containers.
-# ------------------------------------------------------------------------------
-x-user:
-  &default-user
-  user: ${C_UID}:${C_GID}
-# ------------------------------------------------------------------------------
 # Docker extension fields for environment variables. This is used by all
 # containers to ensure that the timezone, UID, and GID are the same.
 # ------------------------------------------------------------------------------
@@ -51,27 +45,25 @@ services:
 # and "unbound" containers.
 # 
 # There are several environment variables:
-# * "PUID" – set to match the host user id.
-# * "PGID" – set to match the host user's group id .
-# * "TZ" – set to desired location, and should match any other containers.
-# * "SERVER_PORT" – port to listen on, must match the later exposed port value.
-# * "SERVER_URL" – the URL of the VPN server.
-# * "PEERS" – the number of clients to generate files for, which can be a 
-#   number or a list of names. Incremenmt, or add names, and rerun the 
-#   container to add more.
-# * "PEER_DNS" – this must point to the "pihole" container.
-# * "INTERNAL_SUBNET" – the subnet the clients will connect to.
-# * "ALLOWED_IPS" – The IPs/Ranges that the peers will be able to reach using 
-#   the VPN connection. If not specified the default value is: 
-#   '0.0.0.0/0, ::0/0' which will cause ALL traffic to route through the VPN.
-#   To enable split tunnelling all private addresses have been set.
+# 
+# - "SERVER_PORT" – port to listen on, must match the later exposed port value;
+# - "SERVER_URL" – the URL of the VPN server;
+# - "PEERS" – set via the "env" file, the number of clients to generate files for, 
+#   which can be a number or a list of names. Increment, or add names, and 
+#  rerun the container to add more;
+# - "PEER_DNS" – this must point to the "pihole" container;
+# - "INTERNAL_SUBNET" – the subnet the clients will connect to; and
+# - "ALLOWED_IPS" – The IPs/Ranges that the peers will be able to reach using 
+#   the VPN connection. If not specified the default value is '0.0.0.0/0, ::0/0'
+#   which will cause ALL traffic to route through the VPN. To enable split 
+#   tunnelling all private addresses have been set.
 #
 # "cap_add" values are necessary for the container to use the host network from
 # the private network the services are connected to.
 #
 # An ipv4 address is specified to allow other services to interact with this
-# container. This address must be within the subnet mask defined in 
-# "public", under the docker "networks".
+# container. This address must be within the subnet mask defined in "public", 
+# under "networks".
 # -----------------------------------------------------------------------------
   wireguard:
     image: ${IMG_PFX}/wireguard-alpine
@@ -113,22 +105,23 @@ services:
 # -----------------------------------------------------------------------------
 # The "pihole" container blocks adverts, trackers and annoyances. It creates
 # two volumes on the host that house it's data:
-# 1. "etc-dnsmasq.d"
+# 
+# 1. "etc-dnsmasq.d"; and
 # 2. "etc-pihole"
 #
-# "ServerIP" points to pihole as does the loopback in "dns". "DNS1" and the  
-# second "dns" entry points to the unbound container.
+# "ServerIP" points to "pihole" as does the loopback in "dns". "DNS1" and the  
+# second "dns" entry points to the "unbound" container.
 #
 # An ipv4 address is specified to allow other services to interact with this
-# container. This address must be within the subnet mask defined in 
-# "public", under the docker "networks".
+# container. This address must be within the subnet mask defined in "public", 
+# under "networks".
 # -----------------------------------------------------------------------------
   pihole:
     image: pihole/pihole:latest
     container_name: pihole
     hostname: pihole
     environment:
-      - TZ=Europe/London
+      - TZ=${H_TZ}
       - ServerIP=${C_NW_PUBLIC}.3
       - DNS1=${C_NW_PUBLIC}.4
       - DNS2=no
@@ -141,8 +134,8 @@ services:
       - 80/tcp
       - 67/udp
     volumes:
-      - "./pihole/etc-pihole:/etc/pihole"
-      - "./pihole/etc-dnsmasq.d:/etc/dnsmasq.d"
+      - pih_pihole:/etc/pihole
+      - pih_dnsmasq:/etc/dnsmasq.d
     networks:
       public:
         ipv4_address: ${C_NW_PUBLIC}.3
@@ -153,14 +146,14 @@ services:
 
 # -----------------------------------------------------------------------------
 # The "unbound" container is a fully recursive local DNS server. Data is stored 
-# in the "unbound_conf" volume.
+# in the "ubd_data" volume.
 #
 # All requests are handled by "unbound" using a "root.hints" file. This file is
 # periodically updated via a cronjob on the host.
 #
 # An ipv4 address is specified to allow other services to interact with this
-# container. This address must be within the subnet mask defined in 
-# "public", under the docker "networks".
+# container. This address must be within the subnet mask defined in "public", 
+# under "networks".
 # -----------------------------------------------------------------------------
   unbound:
     image: ${IMG_PFX}/unbound-alpine
@@ -173,7 +166,7 @@ services:
       - 53/tcp
       - 53/udp
     volumes:
-      - ./unbound/config:/etc/unbound
+      - ubd_data:/etc/unbound
     networks:
       public:
         ipv4_address: ${C_NW_PUBLIC}.4
@@ -188,7 +181,7 @@ services:
 # A minimal range of IP addresses is specified, in CIDR notation, to cover the 
 # number of services that will be connected:
 # 
-# 1. "public" – ${C_NW_PUBLIC}.1 to ${C_NW_PUBLIC}.6
+# 1. "public" - ${C_NW_PUBLIC}.1 to ${C_NW_PUBLIC}.6
 # 
 # N.B.
 # Docker will automatically take the first IP address in each range.
@@ -198,3 +191,15 @@ networks:
     ipam:
       config:
         - subnet: ${C_NW_PUBLIC}.0/29
+
+# ------------------------------------------------------------------------------
+# Volumes to store data for containers:
+# 
+# - pih_pihole – data directory for pihole configuration
+# - pih_dnsmasq – data directory for pihole dnsmasq configutation
+# - ubd_data – data directory for unbound
+# ------------------------------------------------------------------------------
+volumes:
+  pih_pihole:
+  pih_dnsmasq:
+  ubd_data:
