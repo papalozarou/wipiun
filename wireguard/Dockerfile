@@ -17,14 +17,12 @@ LABEL website="https://github.com/$IMG_PFX/wipiun"
 # Variables for use during build, set either here or via `.env` and 
 # `docker-compose` files. 
 # -----------------------------------------------------------------------------
-ARG C_UID
-ARG C_GID
 ARG C_USR
 ARG C_GRP
-ARG C_WGD_PORT
+ARG C_USR_DIR
 
 # -----------------------------------------------------------------------------
-# Copy "entrypoint.sh" and config files.
+# Copy "entrypoint.sh" and config files to user directory.
 #
 # N.B.
 # This is done first as the user directory already exists in the base image, and
@@ -55,5 +53,3 @@ USER $C_USR
 WORKDIR $C_USR_DIR
 
 ENTRYPOINT ["./entrypoint.sh" ]
-
-
