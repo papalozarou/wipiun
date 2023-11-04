@@ -1,7 +1,48 @@
 # -----------------------------------------------------------------------------
 # All variables are set in the matching ".env" file.
 # -----------------------------------------------------------------------------
-version: "3.7"
+version: "3.9"
+
+
+# ------------------------------------------------------------------------------
+# Docker extension fields for default build variables.
+# 
+# N.B.
+# As of compose v2.17.x extension parsing has been improved/corrected and all
+# extension references at the same level must be done in a single line as per:
+#
+# https://github.com/docker/compose/issues/10407
+# ------------------------------------------------------------------------------
+x-build-args:
+  &default-build-args
+  IMG_PFX: ${IMG_PFX}
+  ALP_VER: ${ALP_VER}
+  C_USR: ${C_USR}
+  C_GRP: ${C_GRP}
+  C_USR_DIR: ${C_USR_DIR}
+# ------------------------------------------------------------------------------
+# Docker extension fields for default user, used with third party containers.
+# ------------------------------------------------------------------------------
+x-user:
+  &default-user
+  user: ${C_UID}:${C_GID}
+# ------------------------------------------------------------------------------
+# Docker extension fields for environment variables. This is used by all
+# containers to ensure that the timezone, UID, and GID are the same.
+# ------------------------------------------------------------------------------
+x-env:
+  &default-env
+  TZ: ${H_TZ}  
+  PUID: ${C_UID}
+  GUID: ${C_GID}
+# ------------------------------------------------------------------------------
+# Docker extension fields for default security options that disallow privilege
+# escalation inside a container.
+# ------------------------------------------------------------------------------
+x-security:
+  &default-security
+  security_opt:
+    - no-new-privileges:true
 
 services:
 # -----------------------------------------------------------------------------
@@ -30,27 +71,22 @@ services:
 #
 # An ipv4 address is specified to allow other services to interact with this
 # container. This address must be within the subnet mask defined in 
-# "vpnNetwork", under the docker "networks".
+# "public", under the docker "networks".
 # -----------------------------------------------------------------------------
   wireguard:
-    image: papalozarou/wireguard-alpine
+    image: ${IMG_PFX}/wireguard-alpine
     container_name: wireguard
     build:
       context: ./wireguard
       args:
-        - UID=${C_UID}
-        - GID=${C_GID}
-        - USR=${C_USR}
-        - GRP=${C_GRP}
+        <<: *default-build-args
     environment:
-      - PUID=${H_UID}
-      - PGID=${H_GID}
-      - TZ=Europe/London
+      <<: *default-env
       - SERVER_PORT=00000
-      # - SERVER_URL=yoursubdomain.yourdomain.com
-      - CLIENTS=The,List,Of,Your,Devices
-      - CLIENT_DNS=172.16.0.3
-      - INTERNAL_SUBNET=172.17.0.0
+      - SERVER_URL=${H_URL}
+      - CLIENTS=${C_WGD_CLIENTS}
+      - CLIENT_DNS=${C_NW_PUBLIC}.3
+      - INTERNAL_SUBNET=${C_NW_VPN}.0
       - ALLOWED_IPS=1.0.0.0/8, 2.0.0.0/8, 3.0.0.0/8, 4.0.0.0/6, 8.0.0.0/7, 11.0.0.0/8, 12.0.0.0/6, 16.0.0.0/4, 32.0.0.0/3, 64.0.0.0/2, 128.0.0.0/3, 160.0.0.0/5, 168.0.0.0/6, 172.0.0.0/12, 172.32.0.0/11, 172.64.0.0/10, 172.128.0.0/9, 173.0.0.0/8, 174.0.0.0/7, 176.0.0.0/4, 192.0.0.0/9, 192.128.0.0/11, 192.160.0.0/13, 192.169.0.0/16, 192.170.0.0/15, 192.172.0.0/14, 192.176.0.0/12, 192.192.0.0/10, 193.0.0.0/8, 194.0.0.0/7, 196.0.0.0/6, 200.0.0.0/5, 208.0.0.0/4, 10.5.0.3/32
     volumes:
       - ./wireguard/config:/config
@@ -58,19 +94,20 @@ services:
     ports:
       - "00000:51820/udp"
     dns:
-      - 172.16.0.3
-      - 172.16.0.4
+      - ${C_NW_PUBLIC}.3
+      - ${C_NW_PUBLIC}.4
     cap_add:
       - NET_ADMIN
       - SYS_MODULE
     sysctls:
       - net.ipv4.conf.all.src_valid_mark=1
     networks:
-      vpnNetwork:
-        ipv4_address: 172.16.0.2
+      public:
+        ipv4_address: ${C_NW_PUBLIC}.2
     depends_on:
       - pihole
       - unbound
+    <<: *default-security
     restart: unless-stopped
 
 # -----------------------------------------------------------------------------
@@ -84,7 +121,7 @@ services:
 #
 # An ipv4 address is specified to allow other services to interact with this
 # container. This address must be within the subnet mask defined in 
-# "vpnNetwork", under the docker "networks".
+# "public", under the docker "networks".
 # -----------------------------------------------------------------------------
   pihole:
     image: pihole/pihole:latest
@@ -92,12 +129,12 @@ services:
     hostname: pihole
     environment:
       - TZ=Europe/London
-      - ServerIP=172.16.0.3
-      - DNS1=172.16.0.4
+      - ServerIP=${C_NW_PUBLIC}.3
+      - DNS1=${C_NW_PUBLIC}.4
       - DNS2=no
     dns:
       - 127.0.0.1
-      - 172.16.0.4
+      - ${C_NW_PUBLIC}.4
     expose:
       - 53/tcp
       - 53/udp
@@ -107,10 +144,11 @@ services:
       - "./pihole/etc-pihole:/etc/pihole"
       - "./pihole/etc-dnsmasq.d:/etc/dnsmasq.d"
     networks:
-      vpnNetwork:
-        ipv4_address: 172.16.0.3
+      public:
+        ipv4_address: ${C_NW_PUBLIC}.3
     depends_on:
       - unbound
+    <<: *default-security
     restart: unless-stopped
 
 # -----------------------------------------------------------------------------
@@ -122,41 +160,41 @@ services:
 #
 # An ipv4 address is specified to allow other services to interact with this
 # container. This address must be within the subnet mask defined in 
-# "vpnNetwork", under the docker "networks".
+# "public", under the docker "networks".
 # -----------------------------------------------------------------------------
   unbound:
-    image: papalozarou/unbound-alpine
+    image: ${IMG_PFX}/unbound-alpine
     container_name: unbound
     build:
       context: ./unbound
       args:
-        - UID=${C_UID}
-        - GID=${C_GID}
-        - USR=${C_USR}
-        - GRP=${C_GRP}
-        - VERSION=${U_VERSION}
-        - URL=${U_URL}
+        <<: *default-build-args
     expose:
       - 53/tcp
       - 53/udp
     volumes:
       - ./unbound/config:/etc/unbound
     networks:
-      vpnNetwork:
-        ipv4_address: 172.16.0.4
+      public:
+        ipv4_address: ${C_NW_PUBLIC}.4
+    <<: *default-security
     restart: unless-stopped
 
 # -----------------------------------------------------------------------------
-# Two networks to separete concerns:
-# 1. default – for "nginx" and "certbot". 
-# 2. vpnNetwork – for "wireguard", "pihole" and "unbound"
+# One network is defined:
 #
-# The subnet mask is written in CIDR notation and addresses used for services
-# must be part of this range.
+# 1. "public" – for "wireguard", "pihole" and "unbound"
+#
+# A minimal range of IP addresses is specified, in CIDR notation, to cover the 
+# number of services that will be connected:
+# 
+# 1. "public" – ${C_NW_PUBLIC}.1 to ${C_NW_PUBLIC}.6
+# 
+# N.B.
+# Docker will automatically take the first IP address in each range.
 # -----------------------------------------------------------------------------
 networks:
-  default:
-  vpnNetwork:
+  public:
     ipam:
       config:
-        - subnet: 172.16.0.0/28
+        - subnet: ${C_NW_PUBLIC}.0/29
