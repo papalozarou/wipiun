@@ -1,41 +1,42 @@
-# -----------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
+# Set image prefix and Alpine version for base image.
+# ------------------------------------------------------------------------------
+ARG IMG_PFX
+ARG ALP_VER
+
+# ------------------------------------------------------------------------------
 # Base image and metadata.
-# -----------------------------------------------------------------------------
-FROM alpine:latest
+# ------------------------------------------------------------------------------
+FROM $IMG_PFX/alpine-base-$ALP_VER:latest
 
 LABEL maintainer="Papa Lozarou"
-LABEL description="Experimental Unbound alpine image."
+LABEL description="An experimental Dockerised Unbound, built on Alpine Linux."
+LABEL website="https://github.com/$IMG_PFX/wipiun"
 
 # -----------------------------------------------------------------------------
 # Variables for use during build, set either here or via `.env` and 
 # `docker-compose` files. 
 # -----------------------------------------------------------------------------
-ARG UID
-ARG GID
-ARG USR
-ARG GRP
+ARG C_USR
+ARG C_GRP
+ARG C_USR_DIR
 
 # -----------------------------------------------------------------------------
-# Copy `unbound.sh` script to `/`
+# Copy "entrypoint.sh" to user directory.
+#
+# N.B.
+# This is done first as the user directory already exists in the base image, and
+# we can add the "chmod" part to the below "RUN" command.
 # -----------------------------------------------------------------------------
-COPY ./unbound.sh /unbound.sh
+COPY --chown=$C_USR:$C_GRP ./scripts/ $C_USR_DIR/
 
 # -----------------------------------------------------------------------------
-# Set execute permissions on the script.
+# Update and install "perl" and "unbound", then make "entrypoint.sh" executable.
 # -----------------------------------------------------------------------------
-RUN chmod +x /unbound.sh && \
-# -----------------------------------------------------------------------------
-# Install perl – for `unbound.sh` – tini and unbound.
-# -----------------------------------------------------------------------------
-    apk update && \
+RUN apk update && \
     apk add --no-cache perl \
-        tini \
         unbound && \
-# -----------------------------------------------------------------------------
-# Create group $GRP with $GID, user $USR with $UID.
-# -----------------------------------------------------------------------------
-    addgroup -g $GID $GRP && \
-    adduser -S -u $UID -G $GRP $USR
+    chmod +x $C_USR_DIR/entrypoint.sh
 
 # -----------------------------------------------------------------------------
 # Expose ports for unbound (53/tcp and 53/udp). Both TCP and UDP are specified 
@@ -44,11 +45,11 @@ RUN chmod +x /unbound.sh && \
 EXPOSE 53/tcp
 EXPOSE 53/udp
 
-# -----------------------------------------------------------------------------
-# Run unbound, via `unbound.sh` script on startup.
-# -----------------------------------------------------------------------------
-CMD ["/unbound.sh"]
+# ------------------------------------------------------------------------------
+# Set user and working directory, run "entrypoint.sh", then run Unbound 
+# on startup, via "exec "$@""" in "entrypoint.sh`.
+# ------------------------------------------------------------------------------
+USER $C_USR
+WORKDIR $C_USR_DIR
 
-
-
-    
+ENTRYPOINT ["./entrypoint.sh"]
