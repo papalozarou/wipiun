@@ -45,7 +45,7 @@ RUN apk update && \
 # -----------------------------------------------------------------------------
 # Expose port for Wireguard, UDP is set for verbosity.
 # -----------------------------------------------------------------------------
-EXPOSE $C_WGD_PORT/udp
+EXPOSE 51820/udp
 
 # ------------------------------------------------------------------------------
 # Set user and working directory, run "entrypoint.sh", then run Wireguard 
