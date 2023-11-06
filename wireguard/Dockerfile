@@ -52,4 +52,4 @@ EXPOSE 51820/udp
 USER $C_USR
 WORKDIR $C_USR_DIR
 
-ENTRYPOINT ["./entrypoint.sh" ]
+ENTRYPOINT ["./entrypoint.sh", "sh", "-c", "wg-quick up wg0"]
