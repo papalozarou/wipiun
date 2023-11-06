@@ -42,12 +42,12 @@ CONFIG_KEY='startedContainers'
 #-------------------------------------------------------------------------------
 mainScript () {
   echoComment 'Starting all containers.'
-  su -c 'docker compose up -d'
+  docker compose up -d
 
   echoServiceWait 'all services' 'start' '45'
 
   echoSeparator
-  su -c 'docker compose ps -a'
+  docker compose ps -a
   echoSeparator
   
   echoComment 'All containers should now be started.'
