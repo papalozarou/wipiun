@@ -1,11 +1,11 @@
 #!/bin/sh
 
 #-------------------------------------------------------------------------------
-# Initialises the setup by:
+# Sets up wipiun by:
 #
-# 1. updating and upgrading packages; 
-# 2. checking for a config directory and file; and
-# 3. preparing the service files by removing the ".example" postfix.
+# 1. asking the user for a list of wireguard client machines;
+# 2. checking and setting the container and VPN network IP addresses; and
+# 3. building the wireguard and unbound images.
 # 
 # N.B.
 # This script needs to be run as "sudo".
@@ -15,51 +15,53 @@
 # Imported shared variables.
 #-------------------------------------------------------------------------------
 . ../linshafun/setup.var
-
-#-------------------------------------------------------------------------------
-# Imported project specific variables.
-#-------------------------------------------------------------------------------
-. ./wipiun.var
+. ../linshafun/docker.var
 
 #-------------------------------------------------------------------------------
 # Imported shared functions.
 #-------------------------------------------------------------------------------
 . ../linshafun/comments.sh
-# . ../linshafun/docker-env-variables.sh
-# . ../linshafun/docker-images.sh
+. ../linshafun/docker-env-variables.sh
+. ../linshafun/docker-images.sh
 # . ../linshafun/docker-services.sh
-. ../linshafun/files-directories.sh
+# . ../linshafun/files-directories.sh
 # . ../linshafun/firewall.sh
 # . ../linshafun/host-env-variables.sh
 # . ../linshafun/network.sh
 . ../linshafun/ownership-permissions.sh
-. ../linshafun/packages.sh
+# . ../linshafun/packages.sh
 # . ../linshafun/services.sh
 . ../linshafun/setup-config.sh
 . ../linshafun/setup.sh
 # . ../linshafun/ssh-keys.sh
 # . ../linshafun/text.sh
-# . ../linshafun/user-input.sh
+. ../linshafun/user-input.sh
 
 #-------------------------------------------------------------------------------
 # Config key variable.
 #-------------------------------------------------------------------------------
-CONFIG_KEY='initialisedWipiun'
+CONFIG_KEY='configuredWipiun'
+
+#-------------------------------------------------------------------------------
+# Get a comma separated list of wireguard clients.
+#-------------------------------------------------------------------------------
+getWireguardClients () {
+  promptForUserInput 'Please enter a comma separeted list of your wireguard clients.' 'This list must be comma separated.'
+  WGD_CLIENTS="$(getUserInput)"
+}
 
 #-------------------------------------------------------------------------------
 # Executes the main functions of the script.
-# 
-# N.B.
-# Only one argument is passed to "removePostfixFromFiles" as the default for the
-# second argument is "example".
 #-------------------------------------------------------------------------------
 mainScript () {
-  updateUpgrade
+  getWireguardClients
 
-  checkForSetupConfigFileAndDir
+  setDockerEnvVariables "$DOCKER_ENV_FILE" 'C_WGD_CLIENTS' "$WGD_CLIENTS"
 
-  copyAndRemovePostfixFromFiles "$WIPIUN_DIR"
-  removeFileOrDirectory "$WIPIUN_DIR/setup/setup.conf"
+  checkAndSetDockerEnvVariables "$DOCKER_ENV_FILE" 'C_NW_PUBLIC' 'C_NW_VPN'
+
+  buildDockerImages "$WIPIUN_DIR/$DOCKER_COMPOSE_FILE" 'wireguard' 'unbound'
+  listDockerImages
 }
 
 #-------------------------------------------------------------------------------

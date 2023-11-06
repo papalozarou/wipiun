@@ -1,11 +1,7 @@
 #!/bin/sh
 
 #-------------------------------------------------------------------------------
-# Initialises the setup by:
-#
-# 1. updating and upgrading packages; 
-# 2. checking for a config directory and file; and
-# 3. preparing the service files by removing the ".example" postfix.
+# Starts all the containers.
 # 
 # N.B.
 # This script needs to be run as "sudo".
@@ -17,23 +13,18 @@
 . ../linshafun/setup.var
 
 #-------------------------------------------------------------------------------
-# Imported project specific variables.
-#-------------------------------------------------------------------------------
-. ./wipiun.var
-
-#-------------------------------------------------------------------------------
 # Imported shared functions.
 #-------------------------------------------------------------------------------
 . ../linshafun/comments.sh
 # . ../linshafun/docker-env-variables.sh
 # . ../linshafun/docker-images.sh
 # . ../linshafun/docker-services.sh
-. ../linshafun/files-directories.sh
+# . ../linshafun/files-directories.sh
 # . ../linshafun/firewall.sh
 # . ../linshafun/host-env-variables.sh
 # . ../linshafun/network.sh
 . ../linshafun/ownership-permissions.sh
-. ../linshafun/packages.sh
+# . ../linshafun/packages.sh
 # . ../linshafun/services.sh
 . ../linshafun/setup-config.sh
 . ../linshafun/setup.sh
@@ -42,24 +33,24 @@
 # . ../linshafun/user-input.sh
 
 #-------------------------------------------------------------------------------
-# Config key variable.
+# Config key.
 #-------------------------------------------------------------------------------
-CONFIG_KEY='initialisedWipiun'
+CONFIG_KEY='startedContainers'
 
 #-------------------------------------------------------------------------------
 # Executes the main functions of the script.
-# 
-# N.B.
-# Only one argument is passed to "removePostfixFromFiles" as the default for the
-# second argument is "example".
 #-------------------------------------------------------------------------------
 mainScript () {
-  updateUpgrade
+  echoComment 'Starting all containers.'
+  su -c 'docker compose up -d'
 
-  checkForSetupConfigFileAndDir
+  echoServiceWait 'all services' 'start' '45'
 
-  copyAndRemovePostfixFromFiles "$WIPIUN_DIR"
-  removeFileOrDirectory "$WIPIUN_DIR/setup/setup.conf"
+  echoSeparator
+  su -c 'docker compose ps -a'
+  echoSeparator
+  
+  echoComment 'All containers should now be started.'
 }
 
 #-------------------------------------------------------------------------------
