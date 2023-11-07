@@ -54,19 +54,22 @@ getWireguardClients () {
 
 #-------------------------------------------------------------------------------
 # Sets the server port for wireguard. Checks against rtorrent and plex ports to 
-# see if the generated port is the same. If so re-run this function and if not 
-# replace the port number in the ".env" file.
+# see if the generated port is the same. If not replace the port number in the 
+# ".env" file and write the port to the setup config file. If it matches, re-run
+# this function.
 #-------------------------------------------------------------------------------
 setWireguardServerPort () {
-  local WGD_SERVER_PORT="$(generateAndCheckPort "ssh")"
+  local WGD_PORT="$(generateAndCheckPort "ssh")"
   local RTT_PORT_CHECK_TF="$(checkAgainstExistingPortNumber "rtt")"
   local PLEX_PORT="32400"
 
-  if [ "$RTT_PORT_CHECK_TF" = true ] || [ "$WGD_SERVER_PORT" = "$PLX_PORT" ]; then
+  if [ "$RTT_PORT_CHECK_TF" = true ] || [ "$WGD_PORT" = "$PLX_PORT" ]; then
     setWireguardServerPort
   fi
 
-  setDockerEnvVariables "$DOCKER_ENV_FILE" 'C_WGD_SERVER_PORT' "$WGD_SERVER_PORT"
+  setDockerEnvVariables "$DOCKER_ENV_FILE" 'C_WGD_SERVER_PORT' "$WGD_PORT"
+  
+  writeSetupConfigOption "wgdPort" "WGD_PORT"
 }
 
 #-------------------------------------------------------------------------------
