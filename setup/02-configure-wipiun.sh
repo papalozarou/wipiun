@@ -48,7 +48,7 @@ CONFIG_KEY='configuredWipiun'
 # Get a comma separated list of wireguard clients.
 #-------------------------------------------------------------------------------                    
 getWireguardClients () {
-  promptForUserInput 'Please enter a comma separeted list of your wireguard clients.' 'This list must be comma separated.'
+  promptForUserInput 'Please enter a comma separeted list of your wireguard clients.' 'This list must be comma separated with no spaces, i.e.' 'clientName1,clientName2,clientName3'
   WGD_CLIENTS="$(getUserInput)"
 }
 
