@@ -52,7 +52,8 @@ services:
 #   for, which must be a comma separated list of names. Add names, and rerun the 
 #   container to add more clients;
 # - "CLIENT_DNS" – this must point to the "pihole" container;
-# - "INTERNAL_SUBNET" – the subnet the clients will connect to; and
+# - "INTERNAL_SUBNET" – the subnet the clients will connect to minus the last 
+#   octet, i.e. x.x.x; and
 # - "ALLOWED_IPS" – The IPs/Ranges that the peers will be able to reach using 
 #   the VPN connection. If not specified the default value is '0.0.0.0/0, ::0/0'
 #   which will cause ALL traffic to route through the VPN. To enable split 
@@ -78,7 +79,7 @@ services:
       SERVER_URL: ${H_URL}
       CLIENTS: ${C_WGD_CLIENTS}
       CLIENT_DNS: ${C_NW_PUBLIC}.3
-      INTERNAL_SUBNET: ${C_NW_VPN}.0
+      INTERNAL_SUBNET: ${C_NW_VPN}
       ALLOWED_IPS: 1.0.0.0/8, 2.0.0.0/8, 3.0.0.0/8, 4.0.0.0/6, 8.0.0.0/7, 11.0.0.0/8, 12.0.0.0/6, 16.0.0.0/4, 32.0.0.0/3, 64.0.0.0/2, 128.0.0.0/3, 160.0.0.0/5, 168.0.0.0/6, 172.0.0.0/12, 172.32.0.0/11, 172.64.0.0/10, 172.128.0.0/9, 173.0.0.0/8, 174.0.0.0/7, 176.0.0.0/4, 192.0.0.0/9, 192.128.0.0/11, 192.160.0.0/13, 192.169.0.0/16, 192.170.0.0/15, 192.172.0.0/14, 192.176.0.0/12, 192.192.0.0/10, 193.0.0.0/8, 194.0.0.0/7, 196.0.0.0/6, 200.0.0.0/5, 208.0.0.0/4, 10.5.0.3/32
     volumes:
       - ./wireguard/config:/config
