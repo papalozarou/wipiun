@@ -11,8 +11,8 @@ update-root-hints.sh
 /pihole/etc-pihole/*
 /unbound/config/root.hints
 /unbound/config/var/root.key
-/wireguard/config
-/wireguard/server
+/wireguard/config/server
+/wireguard/config/wg0.conf
 
 # -------------------------------------
 # General

@@ -13,36 +13,35 @@ LABEL maintainer="Papa Lozarou"
 LABEL description="An experimental Dockerised Wireguard, built on Alpine Linux."
 LABEL website="https://github.com/$IMG_PFX/wipiun"
 
-# -----------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 # Variables for use during build, set either here or via `.env` and 
 # `docker-compose` files. 
-# -----------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 ARG C_USR
 ARG C_GRP
 ARG C_USR_DIR
 
-# -----------------------------------------------------------------------------
-# Copy "entrypoint.sh" and config files to user directory.
+# ------------------------------------------------------------------------------
+# Copy "entrypoint.sh" to user directory.
 #
 # N.B.
 # This is done first as the user directory already exists in the base image, and
 # we can add the "chmod" part to the below "RUN" command.
-# -----------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 COPY --chown=$C_USR:$C_GRP ./scripts/ $C_USR_DIR/
-COPY --chown=$C_USR:$C_GRP ./defaults $C_USR_DIR/defaults
 
-# -----------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 # Update and install "libqrencode" and "wireguard-tools", then make 
 # "entrypoint.sh" executable.
-# -----------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 RUN apk update && \
     apk add libqrencode \
         wireguard-tools && \
-    chmod +x $C_USR_DIR/entrypoint.sh
+    chmod +x $C_USR_DIR/entrypoint.sh && \
 
-# -----------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 # Expose port for Wireguard, UDP is set for verbosity.
-# -----------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 EXPOSE 51820/udp
 
 # ------------------------------------------------------------------------------
