@@ -73,6 +73,8 @@ setWireguardServerPort () {
 # Executes the main functions of the script.
 #-------------------------------------------------------------------------------
 mainScript () {
+  setWireguardServerPort
+
   getWireguardClients
 
   setDockerEnvVariables "$DOCKER_ENV_FILE" 'C_WGD_CLIENTS' "$WGD_CLIENTS"
