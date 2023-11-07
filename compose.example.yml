@@ -74,7 +74,7 @@ services:
         <<: *default-build-args
     environment:
       <<: *default-env
-      SERVER_PORT: 00000
+      SERVER_PORT: ${C_WGD_SERVER_PORT}
       SERVER_URL: ${H_URL}
       CLIENTS: ${C_WGD_CLIENTS}
       CLIENT_DNS: ${C_NW_PUBLIC}.3
@@ -84,7 +84,7 @@ services:
       - ./wireguard/config:/config
       - /lib/modules:/lib/modules
     ports:
-      - "00000:51820/udp"
+      - "${C_WGD_SERVER_PORT}:51820/udp"
     dns:
       - ${C_NW_PUBLIC}.3
       - ${C_NW_PUBLIC}.4
