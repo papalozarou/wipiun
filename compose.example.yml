@@ -48,9 +48,9 @@ services:
 # 
 # - "SERVER_PORT" – port to listen on, must match the later exposed port value;
 # - "SERVER_URL" – the URL of the VPN server;
-# - "CLIENTS" – set via the "env" file, the number of clients to generate files for, 
-#   which can be a number or a list of names. Increment, or add names, and 
-#  rerun the container to add more;
+# - "CLIENTS" – set via the "env" file, the number of clients to generate files 
+#   for, which must be a comma separated list of names. Add names, and rerun the 
+#   container to add more clients;
 # - "CLIENT_DNS" – this must point to the "pihole" container;
 # - "INTERNAL_SUBNET" – the subnet the clients will connect to; and
 # - "ALLOWED_IPS" – The IPs/Ranges that the peers will be able to reach using 
