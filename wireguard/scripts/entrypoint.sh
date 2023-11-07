@@ -1,108 +1,247 @@
 #!/bin/sh
 
 # ------------------------------------------------------------------------------
-# Script to set up Wireguard on container first run.
+# Script to set up Wireguard on container first run, by:
+# 
+# 1. Preparing the config directory;
+# 2.
+# 3.
+# 4.
 #
 # N.B.
 # Wireguard kernal module is assumed to be active on the host machine. If it is 
 # not you must install it. It is present on most modern linux installs.
 # ------------------------------------------------------------------------------
 
+#-------------------------------------------------------------------------------
+# Directory variables
+#-------------------------------------------------------------------------------
+WG_CONF_DIR="$PWD/config"
+WG_SERVER_DIR="$WG_CONF_DIR/server"
+WG_TEMPLATES_DIR="$WG_CONF_DIR/templates"
+WG_CONF_DIR_SYMLINK='/etc/wireguard'
+
+#-------------------------------------------------------------------------------
+# File variables
+#-------------------------------------------------------------------------------
+WG_CONF="$WG_CONF_DIR/wg0.conf"
+WG_CONF_SYMLINK="$WG_CONF_DIR_SYMLINK/wg0.conf"
+
+#-------------------------------------------------------------------------------
+# Comment variables.
+#-------------------------------------------------------------------------------
+COMMENT_PREFIX='WIREGUARD SETUP:'
+COMMENT_SEPARATOR='------------------------------------------------------------------'
+
 ****** REMEMBER WE'RE USING sh not bash and that it's PUID and GUID ******
 
-addClientToServerConf () {
+# ------------------------------------------------------------------------------
+# 
+# ------------------------------------------------------------------------------
+# addClientToServerConf () {
 
+# }
+
+# ------------------------------------------------------------------------------
+# 
+# ------------------------------------------------------------------------------
+# addServerAllowedIps () {
+
+# }
+
+# ------------------------------------------------------------------------------
+# Checks to see if "$CLIENTS" has been set.
+# ------------------------------------------------------------------------------
+checkClientsSet () {
+  if [ -n "$CLIENTS" ]; then
+    echo true
+  else
+    echo false
+  fi
 }
 
-addServerAllowedIps () {
-
+# ------------------------------------------------------------------------------
+# Checks for an existing server config file in "$WG_CONF_DIR".
+# ------------------------------------------------------------------------------
+checkForServerConf () {
+  if [ -f "$WG_CONF" ]; then 
+    echo true
+  else
+    echo false
+  fi
 }
 
-generateClientConfig () {
-
-}
-
-generateClientConfigs () {
-
-}
-
-generateClientKeys()  {
+#-------------------------------------------------------------------------------
+# Echoes comments. Takes one mandatory argument:
+# 
+# 1. "${1:?}" – a comment.
+#-------------------------------------------------------------------------------
+echoComment () {
+  local COMMENT="${1:?}"
   
+  echo "$COMMENT_PREFIX $COMMENT"
 }
 
-generateClientQrCode () {
+#-------------------------------------------------------------------------------
+# Echose an "N.B." line for consistency.
+#-------------------------------------------------------------------------------
+echoNb () {
+  echo "$COMMENT_PREFIX ****** N.B. ******"
+}
+
+#-------------------------------------------------------------------------------
+# Echoes comment separator. Takes no arguments.
+#-------------------------------------------------------------------------------
+echoSeparator () {
+  echoComment "$COMMENT_SEPARATOR"
+}
+
+# ------------------------------------------------------------------------------
+# 
+# ------------------------------------------------------------------------------
+# generateClientConfig () {
+
+# }
+
+# ------------------------------------------------------------------------------
+# 
+# ------------------------------------------------------------------------------
+# generateClientConfigs () {
+
+# }
+
+# ------------------------------------------------------------------------------
+# 
+# ------------------------------------------------------------------------------
+# generateClientKeys()  {
   
-}
+# }
 
-generateServerConf () {
+# ------------------------------------------------------------------------------
+# 
+# ------------------------------------------------------------------------------ 
+# generateClientQrCode () {
+  
+# }
 
-}
+# ------------------------------------------------------------------------------
+# 
+# ------------------------------------------------------------------------------
+# generateServerConf () {
+
+# }
 
 # ------------------------------------------------------------------------------
 # Generates "$CLIENTS" using value of docker env variable "$CLIENTS".
 # ------------------------------------------------------------------------------
-getClients () {
+# getClients () {
 
-}
+# }
 
 # ------------------------------------------------------------------------------
 # Removes any existing configurations in "etc/wireguard" and symlinks to a
-# config in "$USER_DIR/config".
+# config directory at "$PWD/config".
 # ------------------------------------------------------------------------------
-prepFolderAndSymlink () {
+prepConfDir () {
+  echoComment "Intitialising /etc/wireguard and $WG_CONF_DIR."
+  mkdir -p "$WG_SERVER_DIR"
 
+  echoComment "Symlinking $WG_CONF_DIR to $WG_CONF_DIR_SYMLINK."
+  ln -s "$WG_CONF_DIR" "$WG_CONF_DIR_SYMLINK"
 }
 
 # ------------------------------------------------------------------------------
-# Copy the default templates to the "$USER_DIR/config" directory for use later
-# if they don't already exist.
+# 
 # ------------------------------------------------------------------------------
-prepTemplates () {
+# saveDockerEnvVariables () {
 
-}
-
-saveDockerEnvVariables () {
-
-}
+# }
 
 # ------------------------------------------------------------------------------
 # Checks to see if "$CLIENT_DNS" is blank or set to "auto" and if true sets it
 # to the host's DNS.
 # ------------------------------------------------------------------------------
-setClientDns () {
+# setClientDns () {
 
-}
+# }
 
-setClientIp () {
+# ------------------------------------------------------------------------------
+# 
+# ------------------------------------------------------------------------------
+# setClientIp () {
 
-}
+# }
 
-setClientName () {
+# ------------------------------------------------------------------------------
+# 
+# ------------------------------------------------------------------------------
+# setClientName () {
 
-}
+# }
 
 # ------------------------------------------------------------------------------
 # Checks to see if "$SERVER_URL" is a blank string and if true sets it to the
 # server IP address.
 # ------------------------------------------------------------------------------
-setServerUrl () {
+# setServerUrl () {
 
-}
+# }
 
-testAllowedIps () {
+# ------------------------------------------------------------------------------
+# 
+# ------------------------------------------------------------------------------
+# testAllowedIps () {
   
+# }
+
+# ------------------------------------------------------------------------------
+# 
+# ------------------------------------------------------------------------------
+# testClientDns () {
+
+# }
+
+# ------------------------------------------------------------------------------
+# 
+# ------------------------------------------------------------------------------
+# testClientsOrInterface () {
+
+# }
+
+# ------------------------------------------------------------------------------
+# 
+# ------------------------------------------------------------------------------
+# testServerUrlOrPort () {
+
+# }
+
+# ------------------------------------------------------------------------------
+# Executes the main functions of the script.
+# ------------------------------------------------------------------------------
+mainScript () {
+  prepConfDir
+
+  local CLIENTS_TF="$(checkClientsSet)"
+  local SERVER_CONF_TF="$(checkForServerConf)"
+
+  if [ "$CLIENTS_TF" = true ] && [ "$SERVER_CONF_TF" = false ]; then
+    generateServerConf
+    generateClientConfs
+
+    saveDockerEnvVariables
+  elif [ "$CLIENTS_TF" = true ] && [ "$SERVER_CONF_TF" = true ]; then
+    echoComment 'Server already set up. Checking for changes.'
+
+    testClientsOrInterface
+    testServerUrlOrPort
+    testClientDns
+    testAllowedIps
+
+    saveDockerEnvVariables
+  fi
 }
 
-testClientDns () {
-
-}
-
-testClientsOrInterface () {
-
-}
-
-testServerUrlOrPort () {
-
-}
-
-****** REMEMBER WE'RE USING sh not bash and that it's PUID and GUID ******
+#-------------------------------------------------------------------------------
+# Run the script.
+#-------------------------------------------------------------------------------
+mainScript
