@@ -7,12 +7,12 @@ test.sh
 scratchpad.sh
 TODO.md
 update-root-hints.sh
-/pihole/etc-dnsmasq.d/*
-/pihole/etc-pihole/*
-/unbound/config/root.hints
-/unbound/config/var/root.key
-/wireguard/config/server
-/wireguard/config/wg0.conf
+pihole/etc-*
+unbound/config
+wireguard/config/client_*
+wireguard/config/server
+wireguard/config/.dont-touch-this-do-do-do-do
+wireguard/config/wg0.conf
 
 # -------------------------------------
 # General

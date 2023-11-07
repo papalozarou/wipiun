@@ -3,9 +3,15 @@
 # ------------------------------------------------------------------------------
 # project specific
 # -------------------------------------
+test.sh
+scratchpad.sh
+TODO.md
+update-root-hints.sh
 setup
 pihole
-update-root-hints.sh
+unbound/config
+wireguard/config/client_*
+wireguard/config/server
 
 # -------------------------------------
 # General
