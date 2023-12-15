@@ -13,18 +13,29 @@ This setup guide has been tested on Ubuntu 22.04 LTS.
 
 ## 1. Cloning and customising this repository
 
-To run this project you will first need to clone it from Github:
+Clone the repository, and change to the repository directory with:
 
 ```
-git clone https://github.com/papalozarou/wipiun
+git clone git@github.com:papalozarou/wipiun.git && \
+cd ~/wipiun/setup
 ```
+
+You will likely need a personal access token to clone the repository.
+
+Run the first setup script:
+
+```
+sudo ./01-initialise-wipiun.sh
+```
+
+Once completed, run subsequent scripts following instructions and prompts.
+
+### N.B.
+Wireguard requires opening udp port 53. The instal scripts do this in UFW, however if you run an additional firewall, i.e. on your hosting service, you will need to manually open this port in that firewall.
 
 ## 2. Installing the Wireguard app, and the profiles, on your devices
 
 Now you can [install the Wireguard App](https://www.wireguard.com/install/) for your selected system and add the profile for your selected device, either using the QR code or the file found in `~/${yourVPNFolder}/wireguard/config/client_${yourDeviceName}`.
-
-*N.B.*
-Wireguard requires opening udp port 53. The instal scripts do this in UFW, however if you run an additional firewall, i.e. on your hosting service, you will need to manually open this port in that firewall.
 
 ## 3. Post run configuration
 
