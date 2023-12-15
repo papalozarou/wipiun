@@ -3,6 +3,11 @@
 # -----------------------------------------------------------------------------
 # Project specific
 # -------------------------------------
+test.share
+scratchpad.sh
+TODO.md
+update-root-hints.sh
+
 /pihole/etc-dnsmasq.d/*
 /pihole/etc-pihole/*
 /unbound/config/root.hints
@@ -19,7 +24,10 @@
 # Docker
 # -------------------------------------
 .env
-docker-compose.yml
+.env.example
+compose.yml
+compose.yml.example
+Dockerfile
 
 # -------------------------------------
 # Git
