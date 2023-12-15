@@ -35,6 +35,7 @@ Dockerfile
 .git
 .gitattributes
 .github
+.gitmodules
 
 # -------------------------------------
 # VSCode
