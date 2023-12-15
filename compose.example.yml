@@ -161,6 +161,8 @@ services:
       context: ./unbound
       args:
         <<: *default-build-args
+    environment:
+      <<: *default-env
     expose:
       - 53/tcp
       - 53/udp
