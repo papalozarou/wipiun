@@ -24,10 +24,7 @@ update-root-hints.sh
 # Docker
 # -------------------------------------
 .env
-.env.example
 compose.yml
-compose.yml.example
-Dockerfile
 
 # -------------------------------------
 # Git
