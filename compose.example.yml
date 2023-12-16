@@ -162,7 +162,8 @@ services:
       args:
         <<: *default-build-args
     environment:
-      <<: *default-env
+      C_USR: ${C_USR}
+      C_GRP: ${C_GRP}
     expose:
       - 53/tcp
       - 53/udp
