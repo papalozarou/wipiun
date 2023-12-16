@@ -52,7 +52,7 @@ ROOT_HINTS_UPDATE_SCHEDULE="/etc/cron.d/update-root-hints"
 #-------------------------------------------------------------------------------
 # Adds the previously generated update script to the system's crontab.
 #-------------------------------------------------------------------------------
-addPlexUpdateScriptToCrond () {
+addRootHintsUpdateScriptToCrond () {
   echoComment 'Adding the generated update script to the system crontab.'
   su -c 'echo "0 3 1 */6 * root '"$ROOT_HINTS_UPDATE_SCRIPT"'" > '"$ROOT_HINTS_UPDATE_SCHEDULE"''
   
