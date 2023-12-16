@@ -68,14 +68,14 @@ generateRootHintsUpdateScript () {
   cat <<EOF > "$ROOT_HINTS_UPDATE_SCRIPT"
 #!/bin/sh
 
-# -----------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 # Script to run as root, via cron, every six months to update the root.hints 
 # file for unbound.
-# -----------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 
-# -----------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 # Run simple apline linux container and download latest root.hints file.
-# -----------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 docker run --rm -v wipiun_ubd_data:/etc/unbound --workdir /etc/unbound alpine:latest wget -S https://www.internic.net/domain/named.cache -O root.hints
 EOF
   echoComment 'Script generated.'

@@ -25,7 +25,7 @@
 . ../linshafun/comments.sh
 . ../linshafun/docker-env-variables.sh
 . ../linshafun/docker-images.sh
-# . ../linshafun/docker-services.sh
+. ../linshafun/docker-services.sh
 # . ../linshafun/files-directories.sh
 . ../linshafun/firewall.sh
 # . ../linshafun/host-env-variables.sh
@@ -45,11 +45,14 @@
 CONFIG_KEY='configuredWipiun'
 
 #-------------------------------------------------------------------------------
-# Get a comma separated list of wireguard clients.
+# Gets a comma separated list of wireguard clients from the user and replaces 
+# the placeholder value in the ".env" file.
 #-------------------------------------------------------------------------------                    
-getWireguardClients () {
+getAndSetWireguardClients () {
   promptForUserInput 'Please enter a comma separeted list of your wireguard clients.' 'This list must be comma separated with no spaces, i.e.' 'clientName1,clientName2,clientName3'
   WGD_CLIENTS="$(getUserInput)"
+
+  replaceDockerEnvPlaceholderVariable "$DOCKER_ENV_FILE" 'C_WGD_CLIENTS' "$WGD_CLIENTS"
 }
 
 #-------------------------------------------------------------------------------
@@ -67,7 +70,7 @@ setWireguardServerPort () {
     setWireguardServerPort
   fi
 
-  setDockerEnvVariables "$DOCKER_ENV_FILE" 'C_WGD_SERVER_PORT' "$WGD_PORT"
+  replaceDockerEnvPlaceholderVariable "$DOCKER_ENV_FILE" 'H_WGD_SERVER_PORT' "$WGD_PORT"
   
   writeSetupConfigOption "wgdPort" "WGD_PORT"
 }
@@ -78,9 +81,7 @@ setWireguardServerPort () {
 mainScript () {
   setWireguardServerPort
 
-  getWireguardClients
-
-  setDockerEnvVariables "$DOCKER_ENV_FILE" 'C_WGD_CLIENTS' "$WGD_CLIENTS"
+  getAndSetWireguardClients
 
   checkAndSetDockerEnvVariables "$DOCKER_ENV_FILE" 'C_NW_PUBLIC' 'C_NW_VPN'
 
