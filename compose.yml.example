@@ -85,7 +85,7 @@ services:
       - ./wireguard/config:/config
       - /lib/modules:/lib/modules
     ports:
-      - "${H_WGD_SERVER_PORT}/udp:51820/udp"
+      - "${H_WGD_SERVER_PORT}:51820/udp"
     dns:
       - ${C_PIH_IP}
       - ${C_UBD_IP}
