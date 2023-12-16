@@ -4,19 +4,21 @@
 # Script to calculate and configure various settings for unbound based on the
 # host container.
 #
-# Once the settings file has been outputted, the script generates a `root.key`
+# Once the settings file has been outputted, the script generates a "root.key"
 # file, checks the configuration for errors and runs unbound via tini.
 #
 # Tweaked from Matthew Vance's unbound docker:
-# https://github.com/MatthewVance/unbound-docker
+# 
+# - https://github.com/MatthewVance/unbound-docker
 # ------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------
 # Variables for:
+# 
 # - Directories for unbound binaries and config files – both of these can change
 #   depending on if you install unbound via apk or compile it:
-#   - `/usr/sbin` – for apk installs.
-#   - `/sbin` – for compiled intalls.
+#   - "/usr/sbin" – for apk installs.
+#   - "/sbin" – for compiled intalls.
 # - Memory values for use within the config file.
 # 
 # N.B.
@@ -32,7 +34,7 @@ AVAILABLE_MEMORY=$((1024 * $( (grep MemAvailable /proc/meminfo || grep MemTotal 
 MEMORY_LIMIT=$AVAILABLE_MEMORY
 
 # ------------------------------------------------------------------------------
-# Tests to make sure we have enough memory
+# Tests to make sure we have enough memory.
 # ------------------------------------------------------------------------------
 [ -r /sys/fs/cgroup/memory/memory.limit_in_bytes ] && MEMORY_LIMIT=$(cat /sys/fs/cgroup/memory/memory.limit_in_bytes | sed 's/[^0-9]//g')
 [[ ! -z $MEMORY_LIMIT && $MEMORY_LIMIT -gt 0 && $MEMORY_LIMIT -lt $AVAILABLE_MEMORY ]] && AVAILABLE_MEMORY=$MEMORY_LIMIT
@@ -42,9 +44,9 @@ if [ $AVAILABLE_MEMORY -le $(($RESERVED_MEMORY * 2)) ]; then
 fi
 
 # ------------------------------------------------------------------------------
-# Updates `$AVAILABLE_MEMORY` and sets cache sizes and `$NPROC`.
+# Updates "$AVAILABLE_MEMORY" and sets cache sizes and "$NPROC".
 #
-# `MSG_CACHE_SIZE` is set to twice as much as `RR_CACHE_SIZE` as per config
+# "MSG_CACHE_SIZE" is set to twice as much as "RR_CACHE_SIZE" as per config
 # file recommendation.
 # ------------------------------------------------------------------------------
 AVAILABLE_MEMORY=$(($AVAILABLE_MEMORY - $RESERVED_MEMORY))
@@ -55,11 +57,11 @@ MSG_CACHE_SIZE=$(($RR_CACHE_SIZE / 2))
 NPROC=$(nproc)
 
 # ------------------------------------------------------------------------------
-# Calculates the base 2 log of the number of processors in `$NPROC`, rounds to
-# the nearest integer and sets `$SLABS` to two a power of two of this number.
+# Calculates the base 2 log of the number of processors in "$NPROC", rounds to
+# the nearest integer and sets "$SLABS" to two a power of two of this number.
 #
-# If the number of processors is 1, sane defaults for `$THREADS` and
-# `$SLABS` are set
+# If the number of processors is 1, sane defaults for "$THREADS" and
+# "$SLABS" are set
 # ------------------------------------------------------------------------------
 export NPROC
 
@@ -77,7 +79,7 @@ else
 fi
 
 # ------------------------------------------------------------------------------
-# Configures and outputs the `unbound.conf` file using the above calculated
+# Configures and outputs the "unbound.conf" file using the above calculated
 # values plus the user and group set at the start of the file.
 # ------------------------------------------------------------------------------
 if [ ! -f $UNBOUND_CONFIG_DIR/unbound.conf ]; then
@@ -434,12 +436,12 @@ mkdir -p -m 700 $UNBOUND_CONFIG_DIR/var && \
 chown $C_USR:$C_GRP $UNBOUND_CONFIG_DIR/var && \
 
 # ------------------------------------------------------------------------------
-# Generates a `root.key` file for the trusted anchor.
+# Generates a "root.key" file for the trusted anchor.
 # ------------------------------------------------------------------------------
 $UNBOUND_BIN_DIR/unbound-anchor -a $UNBOUND_CONFIG_DIR/var/root.key && \
 
 # ------------------------------------------------------------------------------
-# Downloads the root.hints file.
+# Downloads the "root.hints" file.
 # ------------------------------------------------------------------------------
 wget -S https://www.internic.net/domain/named.cache -O $UNBOUND_CONFIG_DIR/root.hints
 
