@@ -67,7 +67,7 @@ getAndSetWireguardClients () {
 # this function.
 #-------------------------------------------------------------------------------
 setWireguardServerPort () {
-  local WGD_PORT="$(generateAndCheckPort "ssh")"
+  WGD_PORT="$(generateAndCheckPort "ssh")"
   local RTT_PORT_CHECK_TF="$(checkAgainstExistingPortNumber "rtt")"
   local PLEX_PORT="32400"
 
@@ -77,7 +77,7 @@ setWireguardServerPort () {
 
   replaceDockerEnvPlaceholderVariable "$DOCKER_ENV_FILE" 'H_WGD_SERVER_PORT' "$WGD_PORT"
   
-  writeSetupConfigOption "wgdPort" "WGD_PORT"
+  writeSetupConfigOption "wgdPort" "$WGD_PORT"
 }
 
 #-------------------------------------------------------------------------------
@@ -91,6 +91,7 @@ mainScript () {
   checkAndSetDockerEnvVariables "$DOCKER_ENV_FILE" 'C_NW_PUBLIC' 'C_NW_VPN'
 
   addRuleToUfw 'allow' '51820' 'udp'
+  addRuleToUfW 'allow' "$WGD_PORT" 'udp'
   addRuleToUfw 'allow' '53' 'udp'
   listUfwRules
   controlService 'ufw' 'reload'
