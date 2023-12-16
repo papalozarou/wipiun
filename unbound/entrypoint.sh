@@ -1,6 +1,6 @@
 #!/bin/sh
 
-# -----------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 # Script to calculate and configure various settings for unbound based on the
 # host container.
 #
@@ -9,20 +9,19 @@
 #
 # Tweaked from Matthew Vance's unbound docker:
 # https://github.com/MatthewVance/unbound-docker
-# -----------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 
-# -----------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 # Variables for:
-# * Host user and group to avoid permission errors.
-# * Directories for unbound binaries and config files – both of these can change
+# - Directories for unbound binaries and config files – both of these can change
 #   depending on if you install unbound via apk or compile it:
-#   * `/usr/sbin` – for apk installs.
-#   * `/sbin` – for compiled intalls.
-# * Memory values for use within the config file.
-# -----------------------------------------------------------------------------
-H_USR=wipiun
-H_GRP=$H_USR
-
+#   - `/usr/sbin` – for apk installs.
+#   - `/sbin` – for compiled intalls.
+# - Memory values for use within the config file.
+# 
+# N.B.
+# "$C_USR" and "$C_GRP" are passed into the container as environment variables. 
+# ------------------------------------------------------------------------------
 UNBOUND_BIN_DIR=/usr/sbin
 UNBOUND_CONFIG_DIR=/etc/unbound
 
@@ -32,9 +31,9 @@ AVAILABLE_MEMORY=$((1024 * $( (grep MemAvailable /proc/meminfo || grep MemTotal 
 
 MEMORY_LIMIT=$AVAILABLE_MEMORY
 
-# -----------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 # Tests to make sure we have enough memory
-# -----------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 [ -r /sys/fs/cgroup/memory/memory.limit_in_bytes ] && MEMORY_LIMIT=$(cat /sys/fs/cgroup/memory/memory.limit_in_bytes | sed 's/[^0-9]//g')
 [[ ! -z $MEMORY_LIMIT && $MEMORY_LIMIT -gt 0 && $MEMORY_LIMIT -lt $AVAILABLE_MEMORY ]] && AVAILABLE_MEMORY=$MEMORY_LIMIT
 if [ $AVAILABLE_MEMORY -le $(($RESERVED_MEMORY * 2)) ]; then
@@ -42,12 +41,12 @@ if [ $AVAILABLE_MEMORY -le $(($RESERVED_MEMORY * 2)) ]; then
     exit 1
 fi
 
-# -----------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 # Updates `$AVAILABLE_MEMORY` and sets cache sizes and `$NPROC`.
 #
 # `MSG_CACHE_SIZE` is set to twice as much as `RR_CACHE_SIZE` as per config
 # file recommendation.
-# -----------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 AVAILABLE_MEMORY=$(($AVAILABLE_MEMORY - $RESERVED_MEMORY))
 
 RR_CACHE_SIZE=$(($AVAILABLE_MEMORY / 3))
@@ -55,13 +54,13 @@ MSG_CACHE_SIZE=$(($RR_CACHE_SIZE / 2))
 
 NPROC=$(nproc)
 
-# -----------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 # Calculates the base 2 log of the number of processors in `$NPROC`, rounds to
 # the nearest integer and sets `$SLABS` to two a power of two of this number.
 #
 # If the number of processors is 1, sane defaults for `$THREADS` and
 # `$SLABS` are set
-# -----------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 export NPROC
 
 if [ "$NPROC" -gt 1 ]; then
@@ -77,10 +76,10 @@ else
     SLABS=4
 fi
 
-# -----------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 # Configures and outputs the `unbound.conf` file using the above calculated
 # values plus the user and group set at the start of the file.
-# -----------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 if [ ! -f $UNBOUND_CONFIG_DIR/unbound.conf ]; then
     sed \
         -e "s/@MSG_CACHE_SIZE@/${MSG_CACHE_SIZE}/" \
@@ -422,33 +421,36 @@ remote-control:
 EOT
 fi
 
-# -----------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 # Creates some basic directories, though I am unsure what these are for.
-# -----------------------------------------------------------------------------
+# 
+# N.B.
+# "$C_USR" and "$C_GRP" are passed into the container as environment variables. 
+# ------------------------------------------------------------------------------
 mkdir -p $UNBOUND_CONFIG_DIR/dev && \
 cp -a /dev/random /dev/urandom /dev/null $UNBOUND_CONFIG_DIR/dev/
 
 mkdir -p -m 700 $UNBOUND_CONFIG_DIR/var && \
-chown $H_USR:$H_GRP $UNBOUND_CONFIG_DIR/var && \
+chown $C_USR:$C_GRP $UNBOUND_CONFIG_DIR/var && \
 
-# -----------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 # Generates a `root.key` file for the trusted anchor.
-# -----------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 $UNBOUND_BIN_DIR/unbound-anchor -a $UNBOUND_CONFIG_DIR/var/root.key && \
 
-# -----------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 # Downloads the root.hints file.
-# -----------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 wget -S https://www.internic.net/domain/named.cache -O $UNBOUND_CONFIG_DIR/root.hints
 
-# -----------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 # Final check of the config file for errors.
-# -----------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 $UNBOUND_BIN_DIR/unbound-checkconf
 
-# -----------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 # Runs unbound via tini, in debug mode, specifying the config file above.
 #
 # https://unbound.docs.nlnetlabs.nl/en/latest/manpages/unbound.html
-# -----------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 exec /sbin/tini -s unbound -d -c $UNBOUND_CONFIG_DIR/unbound.conf
