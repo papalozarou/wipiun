@@ -20,6 +20,11 @@
 . ../linshafun/docker.var
 
 #-------------------------------------------------------------------------------
+# Imported project specific variables.
+#-------------------------------------------------------------------------------
+. ./wipiun.var
+
+#-------------------------------------------------------------------------------
 # Imported shared functions.
 #-------------------------------------------------------------------------------
 . ../linshafun/comments.sh
@@ -88,7 +93,7 @@ mainScript () {
   addRuleToUfw 'allow' '51820' 'udp'
   addRuleToUfw 'allow' '53' 'udp'
   listUfwRules
-  controlService 'ufw' 'restart'
+  controlService 'ufw' 'reload'
 
   buildDockerImages "$WIPIUN_DIR/$DOCKER_COMPOSE_FILE" 'wireguard' 'unbound'
   listDockerImages
