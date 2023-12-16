@@ -105,4 +105,3 @@ mainScript () {
 initialiseScript "$CONFIG_KEY"
 mainScript
 finaliseScript "$CONFIG_KEY"
-
