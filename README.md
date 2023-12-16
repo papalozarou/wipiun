@@ -6,17 +6,17 @@ This setup guide has been tested on Ubuntu 22.04 LTS.
 
 ## Contents
 
-1. [Cloning and customising the repository](#4-cloning-and-customising-this-repository)
-1. [Installing the Wireguard app, and the profiles, on your devices](#5-installing-the-wireguard-app-and-the-profiles-on-your-devices)
-1. [Post run configuration](#6-post-run-configuration)
-1. [Credits](#7-credits)
+1. [Setup](#1-cloning-and-customising-this-repository)
+1. [Installing the Wireguard app, and the profiles, on your devices](#2-installing-the-wireguard-app-and-the-profiles-on-your-devices)
+1. [Post run configuration](#3-post-run-configuration)
+1. [Credits](#4-credits)
 
-## 1. Cloning and customising this repository
+## 1. Setup
 
 Clone the repository, and change to the repository directory with:
 
 ```
-git clone git@github.com:papalozarou/wipiun.git && \
+git clone --recursive git@github.com:papalozarou/wipiun.git && \
 cd ~/wipiun/setup
 ```
 
@@ -28,10 +28,10 @@ Run the first setup script:
 sudo ./01-initialise-wipiun.sh
 ```
 
-Once completed, run subsequent scripts following instructions and prompts.
+Once the first script has completed, run subsequent scripts following instructions and prompts. You can delete the `linshafun` and `setup` folders when finished.
 
 ### N.B.
-Wireguard requires opening udp port 53. The instal scripts do this in UFW, however if you run an additional firewall, i.e. on your hosting service, you will need to manually open this port in that firewall.
+Wireguard requires opening udp port 53 and the server port it configures during setup. The install script add these ports to UFW, however if you run an additional firewall, i.e. on your hosting service, you will need to manually open these ports in that firewall.
 
 ## 2. Installing the Wireguard app, and the profiles, on your devices
 
@@ -59,7 +59,7 @@ You will be prompted to type a new password. If you leave it empty, no password 
 
 ### 3.2. Add blocklists
 
-Within `~/${yourVPNFolder}/pihole` you will find `blocklists.txt` which contains a space separated list of blocklists. To add this list to Pihole:
+Within `~/wipiun/pihole` you will find `blocklists.txt` which contains a space separated list of blocklists. To add this list to Pihole:
 
 1. Tap `Adlists` in the left hand navigation of Pihole;
 2. Paste the contents of `blocklists.txt` into the `Address:` field;
