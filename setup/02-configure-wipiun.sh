@@ -47,7 +47,7 @@
 #-------------------------------------------------------------------------------
 # Config key variable.
 #-------------------------------------------------------------------------------
-CONFIG_KEY='configuredWipiun'
+CONFIG_KEY='wipiunConfigured'
 
 #-------------------------------------------------------------------------------
 # Gets a comma separated list of wireguard clients from the user and replaces 
