@@ -1,4 +1,5 @@
-initialisedWipiun true
-configuredWipiun true
-generatedRootHintsUpdateScript true
-startedWipiunContainers true
+wipiunInitialised true
+wipiunConfigured true
+wipiunGeneratedRootHintsUpdateScript true
+wipiunBuiltAlpineBaseImage true
+wipiunStartedContainers true
