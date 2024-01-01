@@ -25,6 +25,8 @@ Makefile
 .env.example
 compose.yml
 compose.yml.example
+compose.base.yml
+compose.base.yml.example
 Dockerfile
 
 # -------------------------------------
