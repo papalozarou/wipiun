@@ -6,4 +6,4 @@ WIPIUN_DIR="$(dirname $PWD)"
 #-------------------------------------------------------------------------------
 # File variables.
 #-------------------------------------------------------------------------------
-SETUP_CONF="$CONF_DIR/wipiun.conf"
+SETUP_CONF="$SETUP_CONF_DIR/wipiun.conf"
