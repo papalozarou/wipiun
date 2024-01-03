@@ -1,0 +1,206 @@
+# ------------------------------------------------------------------------------
+# All variables are set in the matching ".env" file.
+# ------------------------------------------------------------------------------
+version: "3.9"
+
+# ------------------------------------------------------------------------------
+# Docker extension fields for default build variables.
+# 
+# N.B.
+# As of compose v2.17.x extension parsing has been improved/corrected and all
+# extension references at the same level must be done in a single line as per:
+#
+# https://github.com/docker/compose/issues/10407
+# ------------------------------------------------------------------------------
+x-build-args:
+  &default-build-args
+  IMG_PFX: ${IMG_PFX}
+  ALP_VER: ${ALP_VER}
+  C_USR: ${C_USR}
+  C_GRP: ${C_GRP}
+  C_USR_DIR: ${C_USR_DIR}
+# ------------------------------------------------------------------------------
+# Docker extension fields for environment variables. This is used by all
+# containers to ensure that the timezone, UID, and GID are the same.
+# ------------------------------------------------------------------------------
+x-env:
+  &default-env
+  TZ: ${H_TZ}  
+  PUID: ${C_UID}
+  GUID: ${C_GID}
+# ------------------------------------------------------------------------------
+# Docker extension fields for default security options that disallow privilege
+# escalation inside a container.
+# ------------------------------------------------------------------------------
+x-security:
+  &default-security
+  security_opt:
+    - no-new-privileges:true
+
+services:
+# ------------------------------------------------------------------------------
+# The "wireguard" container runs the VPN service and depends on "pihole" for 
+# adblocking and "unbound" for DNS. It's "dns" values point to the "pihole" 
+# and "unbound" containers.
+# 
+# There are several environment variables:
+# 
+# - "SERVER_PORT" – port to listen on, must match the later exposed port value;
+# - "SERVER_URL" – the URL of the VPN server;
+# - "CLIENTS" – set via the "env" file, the number of clients to generate files 
+#   for, which must be comma separated list of names with no spaces, i.e. 
+#   clientName1,clientName2. Add names, and rerun the container to add more 
+#   clients;
+# - "CLIENT_DNS" – this must point to the "pihole" container;
+# - "INTERNAL_SUBNET" – the subnet the clients will connect to minus the last 
+#   octet, i.e. x.x.x; and
+# - "ALLOWED_IPS" – The IPs/Ranges that the peers will be able to reach using 
+#   the VPN connection. If not specified the default value is '0.0.0.0/0, ::0/0'
+#   which will cause ALL traffic to route through the VPN. To enable split 
+#   tunnelling all private addresses have been set.
+#
+# "cap_add" values are necessary for the container to use the host network from
+# the private network the services are connected to.
+#
+# An ipv4 address is specified to allow other services to interact with this
+# container. This address must be within the subnet mask defined in "public", 
+# under "networks".
+# ------------------------------------------------------------------------------
+  wireguard:
+    image: ${IMG_PFX}/wireguard-alpine
+    container_name: wireguard
+    build:
+      context: ./wireguard
+      args:
+        <<: *default-build-args
+    environment:
+      <<: *default-env
+      SERVER_PORT: ${H_WGD_SERVER_PORT}
+      SERVER_URL: ${H_URL}
+      CLIENTS: ${C_WGD_CLIENTS}
+      CLIENT_DNS: ${C_PIH_IP}
+      INTERNAL_SUBNET: ${C_NW_VPN}.0
+      ALLOWED_IPS: ${C_WGD_ALLOWED_IPS}
+    volumes:
+      - ./wireguard/config:/config
+      - /lib/modules:/lib/modules
+    ports:
+      - "${H_WGD_SERVER_PORT}:51820/udp"
+    dns:
+      - ${C_PIH_IP}
+      - ${C_UBD_IP}
+    cap_add:
+      - NET_ADMIN
+      - SYS_MODULE
+    sysctls:
+      - net.ipv4.conf.all.src_valid_mark=1
+    networks:
+      public:
+        ipv4_address: ${C_WGD_IP}
+    depends_on:
+      - pihole
+      - unbound
+    restart: unless-stopped
+
+# ------------------------------------------------------------------------------
+# The "pihole" container blocks adverts, trackers and annoyances. It creates
+# two volumes on the host that house it's data:
+# 
+# 1. "etc-dnsmasq.d"; and
+# 2. "etc-pihole"
+#
+# "ServerIP" points to "pihole" as does the loopback in "dns". "DNS1" and the  
+# second "dns" entry points to the "unbound" container.
+#
+# An ipv4 address is specified to allow other services to interact with this
+# container. This address must be within the subnet mask defined in "public", 
+# under "networks".
+# ------------------------------------------------------------------------------
+  pihole:
+    image: pihole/pihole:latest
+    container_name: pihole
+    hostname: pihole
+    environment:
+      TZ: ${H_TZ}
+      ServerIP: ${C_PIH_IP}
+      DNS1: ${C_UBD_IP}
+      DNS2: no
+    dns:
+      - 127.0.0.1
+      - ${C_UBD_IP}
+    expose:
+      - 53/tcp
+      - 53/udp
+      - 80/tcp
+      - 67/udp
+    volumes:
+      - "pih_pihole:/etc/pihole"
+      - "pih_dnsmasq:/etc/dnsmasq.d"
+    networks:
+      public:
+        ipv4_address: ${C_PIH_IP}
+    depends_on:
+      - unbound
+    restart: unless-stopped
+
+# ------------------------------------------------------------------------------
+# The "unbound" container is a fully recursive local DNS server. Data is stored 
+# in the "ubd_data" volume.
+#
+# All requests are handled by "unbound" using a "root.hints" file. This file is
+# periodically updated via a cronjob on the host.
+#
+# An ipv4 address is specified to allow other services to interact with this
+# container. This address must be within the subnet mask defined in "public", 
+# under "networks".
+# ------------------------------------------------------------------------------
+  unbound:
+    image: ${IMG_PFX}/unbound-alpine
+    container_name: unbound
+    build:
+      context: ./unbound
+      args:
+        <<: *default-build-args
+    environment:
+      C_USR: ${C_USR}
+      C_GRP: ${C_GRP}
+    expose:
+      - 53/tcp
+      - 53/udp
+    volumes:
+      - ubd_data:/etc/unbound
+    networks:
+      public:
+        ipv4_address: ${C_UBD_IP}
+    restart: unless-stopped
+
+# ------------------------------------------------------------------------------
+# One network is defined:
+#
+# 1. "public" – for "wireguard", "pihole" and "unbound"
+#
+# A minimal range of IP addresses is specified, in CIDR notation, to cover the 
+# number of services that will be connected:
+# 
+# 1. "public" - ${C_NW_PUBLIC}.1 to ${C_NW_PUBLIC}.6
+# 
+# N.B.
+# Docker will automatically take the first IP address in each range.
+# ------------------------------------------------------------------------------
+networks:
+  public:
+    ipam:
+      config:
+        - subnet: ${C_NW_PUBLIC}.0/28
+
+# ------------------------------------------------------------------------------
+# Volumes to store data for containers:
+# 
+# - "pih_pihole" – data directory for pihole configuration
+# - "pih_dnsmasq" – data directory for pihole dnsmasq configutation
+# - "ubd_data" – data directory for unbound
+# ------------------------------------------------------------------------------
+volumes:
+  pih_pihole:
+  pih_dnsmasq:
+  ubd_data:

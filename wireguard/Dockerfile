@@ -1,42 +1,37 @@
-# -----------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
+# Set image prefix and Alpine version for base image.
+# ------------------------------------------------------------------------------
+ARG IMG_PFX
+ARG ALP_VER
+
+# ------------------------------------------------------------------------------
 # Base image and metadata.
-# -----------------------------------------------------------------------------
-FROM alpine:latest
+# ------------------------------------------------------------------------------
+FROM $IMG_PFX/alpine-base-$ALP_VER:latest
 
 LABEL maintainer="Papa Lozarou"
-LABEL description="Experimental Wireguard alpine image."
+LABEL description="An experimental Dockerised Wireguard, built on Alpine Linux."
+LABEL website="https://github.com/$IMG_PFX/wipiun"
 
-# -----------------------------------------------------------------------------
-# Variables for use during build, set either here or via `.env` and 
-# `docker-compose` files. 
-# -----------------------------------------------------------------------------
-ARG UID
-ARG GID
-ARG USR
-ARG GRP
-
+# ------------------------------------------------------------------------------
+# Update and install "libqrencode" and "wireguard-tools", then make 
+# "entrypoint.sh" executable.
+# ------------------------------------------------------------------------------
 RUN apk update && \
     apk add libqrencode \
         s6-overlay \
-        wireguard-tools && \
-# -----------------------------------------------------------------------------
-# Create group $GRP with $GID, user $USR with $UID.
-# -----------------------------------------------------------------------------
-    addgroup -g $GID $GRP && \
-    adduser -S -u $UID -G $GRP $USR
+        wireguard-tools
     
 # -----------------------------------------------------------------------------
-# Copy `unbound.sh` script to `/`
+# Copy "root" folder "/".
 # -----------------------------------------------------------------------------
 COPY ./root /
 
 RUN chmod +x /etc/s6-overlay/scripts/*.sh
 
 # -----------------------------------------------------------------------------
-# Expose port for wireguard 51820/udp). 
+# Expose port for wireguard (51820/udp) and run wireguard via s6 init.
 # -----------------------------------------------------------------------------
 EXPOSE 51820/udp
 
 ENTRYPOINT ["/init"]
-
-

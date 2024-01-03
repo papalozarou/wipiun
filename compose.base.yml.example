@@ -1,0 +1,19 @@
+# ------------------------------------------------------------------------------
+# Compose file for alpine base image.
+# ------------------------------------------------------------------------------
+services:
+  alpine-base:
+    image: ${IMG_PFX}/alpine-base-${ALP_VER}
+    build:
+      context: ./alpine-base
+      args:
+        IMG_PFX: ${IMG_PFX}
+        ALP_VER: ${ALP_VER}
+        C_UID: ${C_UID}
+        C_GID: ${C_GID}
+        C_USR: ${C_USR}
+        C_GRP: ${C_GRP}
+        C_RUN_DIR: ${C_RUN_DIR}
+        C_RUN_USR_DIR: ${C_RUN_USR_DIR}
+        C_RUN_UID_DIR: ${C_RUN_UID_DIR}
+        C_USR_DIR: ${C_USR_DIR}

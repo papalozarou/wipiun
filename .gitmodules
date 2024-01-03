@@ -1,0 +1,6 @@
+[submodule "linshafun"]
+	path = linshafun
+	url = https://github.com/papalozarou/linshafun.git
+[submodule "alpine-base"]
+	path = alpine-base
+	url = https://github.com/papalozarou/alpine-base.git
